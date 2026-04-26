@@ -1,4 +1,4 @@
-package locacao;
+package Locacao.model;
 
 public class Notebook extends ItemLocavel {
 

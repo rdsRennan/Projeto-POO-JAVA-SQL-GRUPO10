@@ -1,1 +1,0 @@
-locacao.ItemLocavel

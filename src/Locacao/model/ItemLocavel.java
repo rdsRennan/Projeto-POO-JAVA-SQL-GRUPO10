@@ -1,7 +1,8 @@
-package locacao;
+package Locacao.model;
 
 public abstract class ItemLocavel {
 
+    private int id;
     private String nome;
     private boolean disponivel = true;
 
@@ -25,8 +26,23 @@ public abstract class ItemLocavel {
     public void setDisponivel(boolean disponivel) {
         this.disponivel = disponivel;
     }
-
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public abstract double calcularCaucao();
 
     public abstract double calcularMultaAtraso(int dias);
+
+    public void setNome(String novoNome) {
+    if (novoNome != null && !novoNome.isEmpty()) {
+        this.nome = novoNome;
+    } else {
+        System.out.println("Nome inválido!");
+    }
+}
 }

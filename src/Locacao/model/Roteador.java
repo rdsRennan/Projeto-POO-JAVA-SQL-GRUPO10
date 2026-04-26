@@ -1,4 +1,4 @@
-package locacao;
+package Locacao.model;
 
 public class Roteador extends ItemLocavel {
 
