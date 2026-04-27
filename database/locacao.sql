@@ -4,6 +4,7 @@ CREATE TABLE `cliente` (
   `nome` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+);
 
 DROP TABLE IF EXISTS `contrato`;
 CREATE TABLE `contrato` (
@@ -34,6 +35,10 @@ CREATE TABLE `item` (
   `disponivel` tinyint(1) DEFAULT NULL,
   `tipo` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
+);
+
+SELECT * FROM contrato;
+
 );
 
 SELECT * FROM contrato;
