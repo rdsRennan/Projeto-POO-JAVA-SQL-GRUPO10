@@ -7,7 +7,7 @@ public class Conexao {
     
     private static final String URL = "jdbc:mysql://localhost:3306/locacao";
     private static final String USER = "root";
-    private static final String PASSWORD = "0000";
+    private static final String PASSWORD = "root";
 
     public static Connection getConnection() {
         try {

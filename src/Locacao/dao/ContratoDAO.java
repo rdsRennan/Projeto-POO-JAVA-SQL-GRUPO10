@@ -48,7 +48,7 @@ public class ContratoDAO {
             FROM contrato c
             JOIN cliente cl ON c.cliente_id = cl.id
             JOIN item i ON c.item_id = i.id
-            WHERE c.finalizado = false
+            WHERE c.finalizado = false;
         """;
 
         try (Connection conn = Conexao.getConnection();
