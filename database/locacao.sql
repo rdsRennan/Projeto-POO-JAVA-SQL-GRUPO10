@@ -18,6 +18,7 @@ CREATE TABLE `contrato` (
   CONSTRAINT `contrato_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `cliente` (`id`),
   CONSTRAINT `contrato_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`)
 );
+
 ALTER TABLE contrato
 DROP FOREIGN KEY contrato_ibfk_2;
 
