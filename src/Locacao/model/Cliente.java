@@ -17,10 +17,6 @@ public class Cliente {
         this.id = id;
     }
 
-    public Cliente(int aInt, String string) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
     public String getNome() {
         return nome;
     }
@@ -29,7 +25,4 @@ public class Cliente {
         return id;
     }
 
-    public void setNome(String novoNome) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }

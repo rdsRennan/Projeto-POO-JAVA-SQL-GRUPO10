@@ -25,7 +25,7 @@ public class SistemaLocacao {
     public ArrayList<Cliente> listarClientes() {
         return clienteDAO.listar();
     }
-
+    
     public String listarClientesTexto() {
         StringBuilder sb = new StringBuilder();
         ArrayList<Cliente> lista = clienteDAO.listar();
@@ -40,19 +40,20 @@ public class SistemaLocacao {
         return sb.toString();
     }
 
-    public void editarCliente(int index, String novoNome) {
+    public String removerClienteTexto(int index) {
+        StringBuilder sb = new StringBuilder();
         ArrayList<Cliente> lista = clienteDAO.listar();
-        Cliente c = lista.get(index);
 
-        c.setNome(novoNome);
-        clienteDAO.atualizar(c);
-    }
+        // validação
+        if (index < 0 || index >= lista.size()) {
+            return "❌ Índice inválido.";
+        }
 
-    public void removerCliente(int index) {
-        ArrayList<Cliente> lista = clienteDAO.listar();
-        Cliente c = lista.get(index);
+        Cliente cliente = lista.get(index);
 
-        clienteDAO.remover(c.getId());
+        clienteDAO.remover(cliente.getId());
+
+        return "✅ Cliente removido: " + cliente.getNome();
     }
 
     public int totalClientes() {
@@ -95,11 +96,24 @@ public class SistemaLocacao {
         itemDAO.atualizar(item);
     }
 
-    public void removerItem(int index) {
+    public String removerItemTexto(int index) {
         ArrayList<ItemLocavel> lista = itemDAO.listar();
+
+        // validação
+        if (index < 0 || index >= lista.size()) {
+            return "❌ Índice inválido.";
+        }
+
         ItemLocavel item = lista.get(index);
 
+        // regra opcional: não remover se estiver alugado
+        if (!item.isDisponivel()) {
+            return "❌ Item está locado e não pode ser removido.";
+        }
+
         itemDAO.remover(item.getId());
+
+        return "✅ Item removido: " + item.getNome();
     }
 
     public int totalItens() {
@@ -159,7 +173,7 @@ public class SistemaLocacao {
         // calcula multa antes de devolver
         double multa = item.calcularMultaAtraso(dias);
 
-        // 🧠 regra de negócio
+        //regra de negócio
         c.devolver(dias);              // também libera o item internamente
         item.setDisponivel(true);      // garantia extra
         itemDAO.atualizar(item);
@@ -201,9 +215,5 @@ public class SistemaLocacao {
         }
 
         return sb.toString();
-    }
-
-    public int totalContratos() {
-        return contratoDAO.listar().size();
     }
 }

@@ -48,7 +48,7 @@ public class ContratoDAO {
             FROM contrato c
             JOIN cliente cl ON c.cliente_id = cl.id
             JOIN item i ON c.item_id = i.id
-            WHERE c.finalizado = false
+            WHERE c.finalizado = false;
         """;
 
         try (Connection conn = Conexao.getConnection();
@@ -57,16 +57,16 @@ public class ContratoDAO {
 
             while (rs.next()) {
 
-                // 🔹 Cliente
+                //Cliente
                 Cliente cliente = new Cliente(rs.getString("cliente_nome"));
                 cliente.setId(rs.getInt("cliente_id"));
 
-                // 🔹 Item (simplificado)
+                //Item (simplificado)
                 ItemLocavel item = new Notebook(rs.getString("item_nome"));
                 item.setId(rs.getInt("item_id"));
                 item.setDisponivel(rs.getBoolean("disponivel"));
 
-                // 🔹 Contrato
+                //Contrato
                 Contrato contrato = new Contrato(cliente, item);
                 contrato.setId(rs.getInt("id"));
 
