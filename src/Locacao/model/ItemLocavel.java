@@ -7,7 +7,7 @@ public abstract class ItemLocavel {
     private boolean disponivel = true;
 
     public ItemLocavel(String nome) {
-        if (nome != null && !nome.isEmpty()) {
+        if (nome != null && !nome.trim().isEmpty()) {
             this.nome = nome;
         } else {
             this.nome = "SemNome";
@@ -26,23 +26,29 @@ public abstract class ItemLocavel {
     public void setDisponivel(boolean disponivel) {
         this.disponivel = disponivel;
     }
+
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
-    
-    public abstract double calcularCaucao();
-
-    public abstract double calcularMultaAtraso(int dias);
 
     public void setNome(String novoNome) {
-    if (novoNome != null && !novoNome.isEmpty()) {
-        this.nome = novoNome;
-    } else {
-        System.out.println("Nome inválido!");
+        if (novoNome != null && !novoNome.trim().isEmpty()) {
+            this.nome = novoNome;
+        } else {
+            System.out.println("Nome inválido!");
+        }
     }
-}
+
+    public abstract double calcularCaucao();
+    public abstract double calcularMultaAtraso(int dias);
+    public abstract String getTipo();
+
+    @Override
+    public String toString() {
+        return id + " - " + nome + " (" + (disponivel ? "Livre" : "Locado") + ")";
+    }
 }

@@ -5,6 +5,7 @@ public class Contrato {
     private int id;
     private Cliente cliente;
     private ItemLocavel item;
+    private int dias;
 
     public Contrato(Cliente cliente, ItemLocavel item) {
         this.cliente = cliente;
@@ -21,6 +22,16 @@ public class Contrato {
         this.id = id;
     }
 
+    // ===== DIAS =====
+    public void setDias(int dias){
+        this.dias = dias;
+    }
+    
+    public int getDias() {
+        return dias;
+    }
+    
+    
     // ===== CLIENTE =====
     public Cliente getCliente() {
         return cliente;

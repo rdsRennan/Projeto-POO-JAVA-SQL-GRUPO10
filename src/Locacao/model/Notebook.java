@@ -15,4 +15,8 @@ public class Notebook extends ItemLocavel {
     public double calcularMultaAtraso(int dias) {
         return dias * 30;
     }
+    @Override
+    public String getTipo() {
+        return "notebook";
+    }
 }

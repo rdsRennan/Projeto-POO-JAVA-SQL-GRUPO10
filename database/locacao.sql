@@ -4,29 +4,6 @@ CREATE TABLE `cliente` (
   `nome` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
-);
-
-DROP TABLE IF EXISTS `contrato`;
-CREATE TABLE `contrato` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `cliente_id` int DEFAULT NULL,
-  `item_id` int DEFAULT NULL,
-  `data_inicio` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `finalizado` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `cliente_id` (`cliente_id`),
-  KEY `item_id` (`item_id`),
-  CONSTRAINT `contrato_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `cliente` (`id`),
-  CONSTRAINT `contrato_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`)
-);
-
-ALTER TABLE contrato
-DROP FOREIGN KEY contrato_ibfk_2;
-
-ALTER TABLE contrato
-ADD CONSTRAINT contrato_ibfk_2
-FOREIGN KEY (item_id) REFERENCES item(id)
-ON DELETE CASCADE;
 
 DROP TABLE IF EXISTS `item`;
 CREATE TABLE `item` (
@@ -37,9 +14,20 @@ CREATE TABLE `item` (
   PRIMARY KEY (`id`)
 );
 
-SELECT * FROM contrato;
-
+DROP TABLE IF EXISTS `contrato`;
+CREATE TABLE contrato (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT,
+    item_id INT,
+    dias INT,
+    FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+    FOREIGN KEY (item_id) REFERENCES item(id)
 );
 
-SELECT * FROM contrato;
+ALTER TABLE contrato
+DROP FOREIGN KEY contrato_ibfk_2;
 
+ALTER TABLE contrato
+ADD CONSTRAINT contrato_ibfk_2
+FOREIGN KEY (item_id) REFERENCES item(id)
+ON DELETE CASCADE;

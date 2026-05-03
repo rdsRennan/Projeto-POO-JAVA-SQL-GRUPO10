@@ -15,4 +15,8 @@ public class Roteador extends ItemLocavel {
     public double calcularMultaAtraso(int dias) {
         return dias * 10;
     }
+    @Override
+    public String getTipo() {
+        return "roteador";
+    }
 }

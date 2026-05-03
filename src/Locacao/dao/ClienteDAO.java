@@ -2,13 +2,13 @@ package Locacao.dao;
 
 import Locacao.connection.Conexao;
 import Locacao.model.Cliente;
-
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ClienteDAO {
 
-    // ================= INSERT =================
+    // ================= CREATE =================
     public void inserir(Cliente cliente) {
         String sql = "INSERT INTO cliente (nome) VALUES (?)";
 
@@ -21,6 +21,7 @@ public class ClienteDAO {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 cliente.setId(rs.getInt(1));
+                System.out.println("Cliente inserido com ID: " + cliente.getId());
             }
 
         } catch (Exception e) {
@@ -28,19 +29,45 @@ public class ClienteDAO {
         }
     }
 
-    // ================= LISTAR =================
-    public ArrayList<Cliente> listar() {
-        ArrayList<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT * FROM cliente";
+    // ================= BUSCAR POR ID =================
+    public Cliente buscarPorId(int id) {
+        String sql = "SELECT id, nome FROM cliente WHERE id = ?";
+
+        try (Connection conn = Conexao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Cliente(
+                    rs.getInt("id"),
+                    rs.getString("nome")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    // ================= READ =================
+    public List<Cliente> listar() {
+        List<Cliente> lista = new ArrayList<>();
+
+        String sql = "SELECT id, nome FROM cliente";
 
         try (Connection conn = Conexao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Cliente c = new Cliente(rs.getString("nome"));
-                c.setId(rs.getInt("id"));
-                lista.add(c);
+                lista.add(new Cliente(
+                    rs.getInt("id"),
+                    rs.getString("nome")
+                ));
             }
 
         } catch (Exception e) {
@@ -51,33 +78,62 @@ public class ClienteDAO {
     }
 
     // ================= UPDATE =================
-    public void atualizar(Cliente cliente) {
+    public boolean atualizar(Cliente cliente) {
         String sql = "UPDATE cliente SET nome = ? WHERE id = ?";
 
-        try (Connection conn = Conexao.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        System.out.println("Tentando atualizar ID: " + cliente.getId());
+        System.out.println("Novo nome: " + cliente.getNome());
 
-            stmt.setString(1, cliente.getNome());
-            stmt.setInt(2, cliente.getId());
-            stmt.executeUpdate();
+        try (Connection conn = Conexao.getConnection()) {
+
+            // verifica se o cliente existe antes
+            String checkSql = "SELECT id FROM cliente WHERE id = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, cliente.getId());
+                ResultSet rs = checkStmt.executeQuery();
+
+                if (!rs.next()) {
+                    System.out.println("ID não encontrado no banco.");
+                    return false;
+                }
+            }
+            // faz o update
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, cliente.getNome());
+                stmt.setInt(2, cliente.getId());
+
+                int linhasAfetadas = stmt.executeUpdate();
+
+                System.out.println("Linhas afetadas: " + linhasAfetadas);
+
+                return linhasAfetadas > 0;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     // ================= DELETE =================
-    public void remover(int id) {
+    public boolean remover(int id) {
         String sql = "DELETE FROM cliente WHERE id = ?";
 
         try (Connection conn = Conexao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            stmt.executeUpdate();
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            System.out.println("Removendo ID: " + id);
+            System.out.println("Linhas afetadas: " + linhasAfetadas);
+
+            return linhasAfetadas > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 }

@@ -12,18 +12,21 @@ public class ItemLocavelDAO {
 
     // ================= INSERT =================
     public void inserir(ItemLocavel item) {
-        String sql = "INSERT INTO item (nome, disponivel) VALUES (?, ?)";
+        String sql = "INSERT INTO item (nome, disponivel, tipo) VALUES (?, ?, ?)";
 
         try (Connection conn = Conexao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, item.getNome());
             stmt.setBoolean(2, item.isDisponivel());
+            stmt.setString(3, item.getTipo());
+
             stmt.executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 item.setId(rs.getInt(1));
+                System.out.println("Item inserido com ID: " + item.getId());
             }
 
         } catch (Exception e) {
@@ -41,13 +44,16 @@ public class ItemLocavelDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
+
                 String nome = rs.getString("nome");
                 boolean disponivel = rs.getBoolean("disponivel");
+                String tipo = rs.getString("tipo");
+                int id = rs.getInt("id");
 
-                //decide o tipo
-                ItemLocavel item = new Notebook(nome); // ou Roteador
+                ItemLocavel item = criarItem(tipo, nome);
+
+                item.setId(id);
                 item.setDisponivel(disponivel);
-                item.setId(rs.getInt("id"));
 
                 lista.add(item);
             }
@@ -59,36 +65,94 @@ public class ItemLocavelDAO {
         return lista;
     }
 
+    // ================= BUSCAR POR ID =================
+    public ItemLocavel buscarPorId(int id) {
+        String sql = "SELECT * FROM item WHERE id = ?";
+
+        try (Connection conn = Conexao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+
+                String nome = rs.getString("nome");
+                String tipo = rs.getString("tipo");
+                boolean disponivel = rs.getBoolean("disponivel");
+
+                ItemLocavel item = criarItem(tipo, nome); // 🔥 reutiliza
+
+                item.setId(id);
+                item.setDisponivel(disponivel);
+
+                return item;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     // ================= UPDATE =================
-    public void atualizar(ItemLocavel item) {
-        String sql = "UPDATE item SET nome = ?, disponivel = ? WHERE id = ?";
+    public boolean atualizar(ItemLocavel item) {
+        String sql = "UPDATE item SET nome = ?, disponivel = ?, tipo = ? WHERE id = ?";
 
         try (Connection conn = Conexao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, item.getNome());
             stmt.setBoolean(2, item.isDisponivel());
-            stmt.setInt(3, item.getId());
+            stmt.setString(3, item.getTipo());
+            stmt.setInt(4, item.getId());
 
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+
+            return linhas > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
-
     // ================= DELETE =================
-    public void remover(int id) {
+    public boolean remover(int id) {
         String sql = "DELETE FROM item WHERE id = ?";
 
         try (Connection conn = Conexao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+
+            return linhas > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ================= FABRICA DE OBJETOS =================
+    private ItemLocavel criarItem(String tipo, String nome) {
+
+        if (tipo == null || tipo.trim().isEmpty()) {
+            System.out.println("⚠️ Tipo nulo, assumindo roteador");
+            return new Roteador(nome);
+        }
+
+        switch (tipo.toLowerCase()) {
+            case "notebook":
+                return new Notebook(nome);
+
+            case "roteador":
+                return new Roteador(nome);
+
+            default:
+                System.out.println("⚠️ Tipo desconhecido: " + tipo);
+                return new Roteador(nome);
         }
     }
 }

@@ -5,24 +5,34 @@ public class Cliente {
     private int id;
     private String nome;
 
-    public Cliente(String nome) {
-        if (nome != null && !nome.isEmpty()) {
-            this.nome = nome;
-        } else {
-            this.nome = "SemNome";
-            System.out.println("Nome inválido, definido como padrão.");
-        }
+    public Cliente(int id, String nome) {
+        this.id = id;
+        this.nome = nome;
     }
+    public Cliente(String nome) {
+        this.nome = nome;
+    }
+    
+    public Cliente(int id) {
+        this.id = id;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+    
     public void setId(int id) {
         this.id = id;
     }
 
+    public int getId() {
+        return id;
+    }
+    
     public String getNome() {
         return nome;
     }
         
-    public int getId() {
-        return id;
-    }
+    
 
 }

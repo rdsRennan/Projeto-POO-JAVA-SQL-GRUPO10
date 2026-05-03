@@ -8,6 +8,7 @@ import Locacao.model.Cliente;
 import Locacao.model.ItemLocavel;
 import Locacao.model.Contrato;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class SistemaLocacao {
@@ -17,67 +18,58 @@ public class SistemaLocacao {
     private ContratoDAO contratoDAO = new ContratoDAO();
 
     // ================= CLIENTES =================
-
     public void adicionarCliente(Cliente c) {
         clienteDAO.inserir(c);
     }
 
-    public ArrayList<Cliente> listarClientes() {
+    public List<Cliente> listarClientes() {
         return clienteDAO.listar();
     }
-    
+
     public String listarClientesTexto() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<Cliente> lista = clienteDAO.listar();
+        List<Cliente> lista = clienteDAO.listar();
 
-        for (int i = 0; i < lista.size(); i++) {
-            sb.append(i)
+        for (Cliente c : lista) {
+            sb.append(c.getId())
               .append(" - ")
-              .append(lista.get(i).getNome())
+              .append(c.getNome())
               .append("\n");
         }
 
         return sb.toString();
     }
 
-    public String removerClienteTexto(int index) {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<Cliente> lista = clienteDAO.listar();
+    public String atualizarClienteTexto(Cliente c){
+        boolean atualizado = clienteDAO.atualizar(c);
 
-        // validação
-        if (index < 0 || index >= lista.size()) {
-            return "❌ Índice inválido.";
-        }
-
-        Cliente cliente = lista.get(index);
-
-        clienteDAO.remover(cliente.getId());
-
-        return "✅ Cliente removido: " + cliente.getNome();
+        return atualizado
+            ? "✅ Cliente atualizado: " + c.getNome()
+            : "❌ Cliente não encontrado.";
     }
 
-    public int totalClientes() {
-        return clienteDAO.listar().size();
+    public String removerClienteTexto(int id) {
+        boolean removido = clienteDAO.remover(id);
+
+        return removido
+            ? "✅ Cliente removido com sucesso."
+            : "❌ Cliente não encontrado.";
     }
 
     // ================= ITENS =================
-
     public void adicionarItem(ItemLocavel item) {
         itemDAO.inserir(item);
     }
 
-    public ArrayList<ItemLocavel> listarItens() {
+    public List<ItemLocavel> listarItens() {
         return itemDAO.listar();
     }
 
     public String listarItensTexto() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<ItemLocavel> lista = itemDAO.listar();
 
-        for (int i = 0; i < lista.size(); i++) {
-            ItemLocavel item = lista.get(i);
-
-            sb.append(i)
+        for (ItemLocavel item : itemDAO.listar()) {
+            sb.append(item.getId())
               .append(" - ")
               .append(item.getNome())
               .append(" - ")
@@ -88,132 +80,101 @@ public class SistemaLocacao {
         return sb.toString();
     }
 
-    public void editarItem(int index, String novoNome) {
-        ArrayList<ItemLocavel> lista = itemDAO.listar();
-        ItemLocavel item = lista.get(index);
+    public String atualizarItemTexto(int id, String novoNome) {
+        ItemLocavel item = itemDAO.buscarPorId(id);
+
+        if (item == null) return "❌ Item não encontrado.";
 
         item.setNome(novoNome);
         itemDAO.atualizar(item);
+
+        return "✅ Item atualizado.";
     }
 
-    public String removerItemTexto(int index) {
-        ArrayList<ItemLocavel> lista = itemDAO.listar();
+    public String removerItemTexto(int id) {
+        ItemLocavel item = itemDAO.buscarPorId(id);
 
-        // validação
-        if (index < 0 || index >= lista.size()) {
-            return "❌ Índice inválido.";
-        }
+        if (item == null) return "❌ Item não encontrado.";
+        if (!item.isDisponivel()) return "❌ Item está locado.";
 
-        ItemLocavel item = lista.get(index);
+        boolean removido = itemDAO.remover(id);
 
-        // regra opcional: não remover se estiver alugado
-        if (!item.isDisponivel()) {
-            return "❌ Item está locado e não pode ser removido.";
-        }
-
-        itemDAO.remover(item.getId());
-
-        return "✅ Item removido: " + item.getNome();
-    }
-
-    public int totalItens() {
-        return itemDAO.listar().size();
+        return removido
+            ? "✅ Item removido."
+            : "❌ Erro ao remover.";
     }
 
     // ================= CONTRATOS =================
+    public String criarContratoTexto(int clienteId, int itemId, int dias) {
 
-    public String criarContratoTexto(int clienteIndex, int itemIndex) {
+        Cliente cliente = clienteDAO.buscarPorId(clienteId);
+        ItemLocavel item = itemDAO.buscarPorId(itemId);
 
-        ArrayList<Cliente> clientes = clienteDAO.listar();
-        ArrayList<ItemLocavel> itens = itemDAO.listar();
+        if (cliente == null || item == null)
+            return "❌ Cliente ou item não encontrado.";
 
-        // validação básica
-        if (clienteIndex < 0 || clienteIndex >= clientes.size() ||
-            itemIndex < 0 || itemIndex >= itens.size()) {
-            return "❌ Índice inválido.";
-        }
-
-        Cliente cliente = clientes.get(clienteIndex);
-        ItemLocavel item = itens.get(itemIndex);
-
-        if (!item.isDisponivel()) {
+        if (!item.isDisponivel())
             return "❌ Item indisponível.";
+        
+        if (dias <= 0) {
+            return "❌ Dias inválidos.";
         }
-
-        double caucao = item.calcularCaucao();
-
-        contratoDAO.inserir(cliente.getId(), item.getId());
+        contratoDAO.inserir(clienteId, itemId, dias);
 
         item.setDisponivel(false);
         itemDAO.atualizar(item);
 
-        // retorno em formato de texto
-        return "✅ Contrato criado com sucesso!\n" +
-               "Cliente: " + cliente.getNome() + "\n" +
-               "Item: " + item.getNome() + "\n" +
-               "Caução: R$ " + caucao;
-        }
-
-    public String devolverItemTexto(int contratoIndex, int dias) {
-
-        ArrayList<Contrato> contratos = contratoDAO.listar();
-
-        //validação
-        if (contratoIndex < 0 || contratoIndex >= contratos.size()) {
-            return "❌ Índice de contrato inválido.";
-        }
-
-        if (dias < 0) {
-            return "❌ Dias de atraso inválidos.";
-        }
-
-        Contrato c = contratos.get(contratoIndex);
-        ItemLocavel item = c.getItem();
-
-        // calcula multa antes de devolver
-        double multa = item.calcularMultaAtraso(dias);
-
-        //regra de negócio
-        c.devolver(dias);              // também libera o item internamente
-        item.setDisponivel(true);      // garantia extra
-        itemDAO.atualizar(item);
-        contratoDAO.finalizar(c.getId());
-
-        //retorno
-        return "Devolução concluída!\n" +
-               "Cliente: " + c.getCliente().getNome() + "\n" +
-               "Item: " + item.getNome() + "\n" +
-               "Dias de atraso: " + dias + "\n" +
-               "Multa: R$ " + String.format("%.2f", multa);
+        return "✅ Contrato criado!";
     }
-
-    public void cancelarContrato(int index) {
-
-        ArrayList<Contrato> contratos = contratoDAO.listar();
-        Contrato c = contratos.get(index);
-
-        ItemLocavel item = c.getItem();
-        item.setDisponivel(true);
-        itemDAO.atualizar(item);
-
-        contratoDAO.remover(c.getId());
+    
+    public List<Contrato> listarContratos() {
+        return contratoDAO.listar();
     }
 
     public String listarContratosTexto() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<Contrato> lista = contratoDAO.listar();
 
-        for (int i = 0; i < lista.size(); i++) {
-            Contrato c = lista.get(i);
-
-            sb.append(i)
+        for (Contrato c : contratoDAO.listar()) {
+            sb.append(c.getId())
               .append(" - Cliente: ")
               .append(c.getCliente().getNome())
               .append(" | Item: ")
               .append(c.getItem().getNome())
+              .append("\n")
+              .append(" | Dias: ")
+              .append(c.getDias())
               .append("\n");
         }
 
         return sb.toString();
+    }
+
+    public String atualizarContratoTexto(int id, int dias) {
+        Contrato c = contratoDAO.buscarPorId(id);
+
+        if (c == null) return "❌ Contrato não encontrado.";
+
+        c.setDias(dias);
+        contratoDAO.atualizar(c);
+
+        return "✅ Contrato atualizado.";
+    }
+
+    public String devolverItemTexto(int contratoId, int dias) {
+
+        Contrato c = contratoDAO.buscarPorId(contratoId);
+
+        if (c == null) return "❌ Contrato não encontrado.";
+
+        ItemLocavel item = c.getItem();
+
+        double multa = item.calcularMultaAtraso(dias);
+
+        item.setDisponivel(true);
+        itemDAO.atualizar(item);
+
+        contratoDAO.finalizar(contratoId);
+
+        return "✅ Devolução concluída\nMulta: R$ " + multa;
     }
 }
